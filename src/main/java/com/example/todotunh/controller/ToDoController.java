@@ -47,7 +47,7 @@ public class ToDoController {
         return updatedToDo;
     }
 
-    @DeleteMapping("/work/{id}")
+    @DeleteMapping("/delete-work/{id}")
     public ResponseEntity<?> deleteWork(@PathVariable(value = "id") Long workId) {
         ToDo toDo = toDoRepository.findById(workId)
                 .orElseThrow(() -> new ResourceNotFoundException("Work", "id", workId));
