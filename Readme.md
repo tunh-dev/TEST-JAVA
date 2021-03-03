@@ -31,9 +31,43 @@ spring.datasource.password = 1234
 - Provide method: save, update, find, findById,...
 
 **Controller**
-- API get All Todo work: api/get-all-work
+- API get All Todo work with paging: 
+    - URL: .../api/get-all-work
+    - Method: POST
+    - Body: 
+      ```
+      {
+          "page": 1, //page value, from: 0,1,2,...
+          "size": 5, //number record each page
+          "field_sort": "name" //field sort by: id, name, start, end, status
+       }
+      ```
 - API create new Todo work: api/create-new-work
-- API get Todo work by ID: api/get-work/{id}
+    - URL: .../api/create-new-work
+    - Method: POST
+    - Body: 
+      ```
+      {
+          "work_name": "work 8", //name
+          "starting_date": "01/02/2021 12:30:00", //time, format: dd/MM/yyyy HH:mm:ss
+          "ending_date": "10/02/2021 12:30:00", //time, format: dd/MM/yyyy HH:mm:ss
+          "status": 1 //Status: 1 2 3
+       }
+      ```
 - API update Todo work: api/update-work
+    - URL: .../api/update-work
+    - Method: POST
+    - Body: 
+      ```
+      {
+           "work_name": "work 8", //name
+           "starting_date": "01/02/2021 12:30:00", //time, format: dd/MM/yyyy HH:mm:ss
+           "ending_date": "10/02/2021 12:30:00", //time, format: dd/MM/yyyy HH:mm:ss
+           "status": 1 //Status: 1 2 3
+       }
+      ```
 - API delete Todo work by ID: api/delete-work/{id}
+    - URL: .../api/delete-work/{id}
+    - Method: DELETE
+    - Body: none
 
