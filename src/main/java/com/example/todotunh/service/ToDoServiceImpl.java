@@ -2,12 +2,18 @@ package com.example.todotunh.service;
 
 import com.example.todotunh.model.ResponseModel;
 import com.example.todotunh.model.ToDo;
+import com.example.todotunh.model.request.GetListPagingRequestModel;
 import com.example.todotunh.model.request.ToDoRequestModel;
+import com.example.todotunh.model.request.UpdateToDoRequestModel;
 import com.example.todotunh.model.response.ListToDoResponseModel;
 import com.example.todotunh.model.response.ToDoResponse;
 import com.example.todotunh.repository.ToDoRepository;
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.text.Format;
@@ -21,20 +27,21 @@ import java.util.List;
 public class ToDoServiceImpl implements ToDoService {
 
     private static final String SUCCESS_STATUS = "SUCCESS";
-    private static final String ERROR_STATUS = "ERROR";
 
     @Autowired
     ToDoRepository toDoRepository;
 
     @Override
-    public ResponseModel<ListToDoResponseModel> getAllWork() throws ServiceException {
+    public ResponseModel<ListToDoResponseModel> getAllWork(GetListPagingRequestModel requestModel) throws ServiceException {
 
         try {
             ListToDoResponseModel listToDoResponseModel = new ListToDoResponseModel();
             ResponseModel<ListToDoResponseModel> responseModel = new ResponseModel<>();
             List<ToDoResponse> listTodoWorkResponse = new ArrayList<>();
 
-            List<ToDo> listToDo = toDoRepository.findAll();
+            Pageable sortedByName = PageRequest.of(requestModel.getPage(), requestModel.getSize(), Sort.by(requestModel.getFieldSort()));
+            Page<ToDo> listToDo = toDoRepository.findAll(sortedByName);
+
             if (!listToDo.isEmpty()) {
                 listToDo.forEach(x -> {
                     ToDoResponse temp = new ToDoResponse();
@@ -71,6 +78,60 @@ public class ToDoServiceImpl implements ToDoService {
             entity.setStatus(requestModel.getStatus());
 
             toDoRepository.save(entity);
+            responseModel.setStatus(SUCCESS_STATUS);
+
+            return responseModel;
+        } catch (Exception exception) {
+            throw new ServiceException("ERROR: " + exception);
+        }
+    }
+
+    @Override
+    public ResponseModel<?> updateToDoWork(UpdateToDoRequestModel requestModel) {
+
+        try {
+            ResponseModel<?> responseModel = new ResponseModel<>();
+
+            String nameUpdate = requestModel.getWorkName();
+            String startUpdate = requestModel.getStartingDate();
+            String endUpdate = requestModel.getEndingDate();
+            long statusUpdate = requestModel.getStatus();
+
+            ToDo entityUpdate = toDoRepository.findFirstById(requestModel.getId());
+
+            if (nameUpdate != null && !nameUpdate.equals("")) {
+                entityUpdate.setName(nameUpdate);
+            }
+
+            if (startUpdate != null && !startUpdate.equals("")) {
+                entityUpdate.setStart(_convertTimeToLong(startUpdate));
+            }
+
+            if (endUpdate != null && !endUpdate.equals("")) {
+                entityUpdate.setEnd(_convertTimeToLong(endUpdate));
+            }
+
+            if (statusUpdate != 0) {
+                entityUpdate.setStatus(requestModel.getStatus());
+            }
+
+            toDoRepository.save(entityUpdate);
+            responseModel.setStatus(SUCCESS_STATUS);
+
+            return responseModel;
+        } catch (Exception exception) {
+            throw new ServiceException("ERROR: " + exception);
+        }
+    }
+
+    @Override
+    public ResponseModel<?> deleteToDoWork(Long id) {
+
+        try {
+            ResponseModel<?> responseModel = new ResponseModel<>();
+
+            ToDo entityDelete = toDoRepository.findFirstById(id);
+            toDoRepository.delete(entityDelete);
             responseModel.setStatus(SUCCESS_STATUS);
 
             return responseModel;
